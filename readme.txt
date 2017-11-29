@@ -27,7 +27,8 @@ This was essential for fast processing for step 3.
 
 Feel free to test everything out. 
 If I was alloted more time I would improve the project by adding status codes to the api calls.
-Currently they pass a status variable in the json object back and forth on routes that can fail based on user input.
+Currently the api passes a status variable in the json object back and forth on routes that can fail based on user input.
+I would also style the site more with more time.
 
 Feel free to contact me with any other questions.
 Best,
