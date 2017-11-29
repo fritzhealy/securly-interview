@@ -6,7 +6,23 @@ function config($routeProvider, $locationProvider){
     })
     .when('/dashboard', {
         templateUrl: 'templates/dashboard.html',
-        controller: 'controller'
+        controller: 'controller',
+        resolve: {
+            auth: function(data){
+                var auth = data.getAuth()
+                .then(function(response){
+                    if(response.data.status===true){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                })
+                .catch(function(){
+                    return false;
+                });
+                return auth;
+            }
+        }
     }).otherwise({
         redirectTo: '/'
     });
@@ -34,33 +50,79 @@ function data($http){
                 method: "POST"
             });
         },
-        getChild: function(){
+        getKid: function(email){
             return $http(
                 {
-                    url: '/api/get-child',
+                    url: '/api/kid?email='+email,
                     method: "GET",
                 }
             );
         },
-        import: function(fileData){
+        getClub: function(name){
+            return $http(
+                {
+                    url: '/api/club?name='+name,
+                    method: "GET",
+                }
+            );
+        },
+        getPastQueries: function(){
+            return $http(
+                {
+                    url: '/api/queries',
+                    method: "GET",
+                }
+            );
+        },
+        saveQuery: function(name, value){
+            return $http(
+                {
+                    url: '/api/save',
+                    method: "POST",
+                    data: {
+                        name: name,
+                        value: value
+                    }
+                }
+            );
+        },
+        /*import: function(fileData){
             return $http({
                 url: '/api/import',
                 method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                data: fileData,
+                data: new Uint8Array(fileData),
+                transformRequest: []
             });
+        },*/
+        getAuth: function(){
+            return $http(
+                {
+                    url: '/api/auth',
+                    method: "GET",
+                }
+            );
         }
     };
 }
-controller.$inject = ['$scope','data', '$location'];
-function controller($scope,data, $location){
-    $scope.formData = {};
+controller.$inject = ['$scope', 'data', '$location', '$route'];
+function controller($scope, data, $location, $route){
+    if($route.current){
+        if($route.current.locals){
+            if(!$route.current.locals.auth){
+                $location.path('/');
+            }
+        }
+    }
+    $scope.kid = {};
+    $scope.select = {};
+    $scope.club = {};
+    $scope.queries = {};
     $scope.importData = {};
     $scope.login = function(){
         data.login($scope.formData.user,$scope.formData.password)
         .then(function(response){
             console.log(response);
-            if(JSON.parse(response.data).status===true){
+            if(response.data.status===true){
                 $location.path('/dashboard');
             }
         })
@@ -69,7 +131,7 @@ function controller($scope,data, $location){
         });
         return false;
     }
-    $scope.import = function(){
+    /*$scope.import = function(){
         var file = document.getElementById('file').files[0];
         if(!file){
             console.log("file empty");
@@ -86,13 +148,63 @@ function controller($scope,data, $location){
             });
         }
         reader.readAsArrayBuffer(file);
-    }
-    $scope.getChild = function(){
-        data.getChild()
+    }*/
+    $scope.getPastQueries = function(){
+        data.getPastQueries()
         .then(function(response){
             console.log(response);
+            $scope.queries = response.data;
+        }).catch(function(error){
+            console.log(error);
+        });
+    }
+    $scope.getPastQueries();
+    $scope.rerun = function(){
+        value = $scope.select;
+        if(value){
+            $scope.club.name = "";
+            $scope.kid.email = "";
+            values = value.split("|");
+            operation = values[0];
+            value = values[1];
+            if(operation=="getKid"){
+                $scope.kid.email = value;
+            }
+            if(operation=="getClub"){
+                $scope.club.name = value;
+            }
+            $scope.get();
+        }
+    }
+    $scope.get = function(){
+        data.getClub($scope.club.name)
+        .then(function(response){
+            $scope.club.schools = response.data.schools;
+            $scope.club.kids = response.data.kids; 
+            data.saveQuery("getClub",$scope.club.name)
+            .then(function(){
+                $scope.getPastQueries();
+
+            }).catch(function(){
+                console.log("error");
+            });
         })
         .catch(function(){
+            console.log("error");
+        });
+        data.getKid($scope.kid.email)
+        .then(function(response){
+            $scope.kid.clubs = response.data.clubs;
+            $scope.kid.schools = response.data.schools;
+            data.saveQuery("getKid",$scope.kid.email)
+            .then(function(){
+                $scope.getPastQueries();
+
+            }).catch(function(){
+                console.log("error");
+            });
+        })
+        .catch(function(error){
             console.log("error");
         });
     }

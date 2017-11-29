@@ -9,6 +9,11 @@ class View {
             Controller::render();
             return;
         }
+        if(preg_match("/^\/import$/",$_SERVER[REQUEST_URI])){
+            //pass through for importer
+            require_once "import.php";
+            return;
+        }
         require_once "home.php";
     }
 }
