@@ -9,7 +9,7 @@ class View {
             Controller::render();
             return;
         }
-        if(preg_match("/^\/import$/",$_SERVER[REQUEST_URI])){
+        if(preg_match("/^\/import$/",$_SERVER[REQUEST_URI])&&$_SERVER['REQUEST_METHOD']==='GET'){
             //pass through for importer
             require_once "import.php";
             return;

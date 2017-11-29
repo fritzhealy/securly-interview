@@ -135,7 +135,7 @@ class Db {
             } catch(PDOException $e){
                 echo $e;
             }
-            return "Succes, imported everyone!";
+            return "Success, imported everyone!";
         } else {
             return "Import failed, couldn't open file";
         }

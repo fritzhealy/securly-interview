@@ -1,13 +1,14 @@
+<p>Run past queries by selecting a dropdown here</p>
 <select ng-model="select" ng-change="rerun()">
     <option ng-repeat="(key,value) in queries.queries" value="{{value.name}}|{{value.value}}">
         Operation {{value.name}} for {{value.value}}
     </option>
-</select><br>
-<label>Input Email to find club and schools</label><br>
-<input ng-model="kid.email" type="text"><br>
-<label>Input Club to find Kids and schools</label><br>
-<input ng-model="club.name" type="text"><br>
-<label>Input Kid one and two to find if connected</label><br>
+</select>
+<label>Input Email to find club and schools</label>
+<input ng-model="kid.email" type="text">
+<label>Input Club to find Kids and schools</label>
+<input ng-model="club.name" type="text">
+<label>Input Kid one and two to find if connected</label>
 <input ng-model="kids.email1" type="text">
 <input ng-model="kids.email2" type="text"> Connected: {{kids.connected}}<br>
 <button ng-click="get()">Submit</button>
@@ -44,3 +45,4 @@
         </ul>
     </div>
 </div>
+<button ng-click="logout()">Logout</button>

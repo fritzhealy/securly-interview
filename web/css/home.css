@@ -1,0 +1,15 @@
+#masthead {
+    padding: 2% 5%;
+    background-color: black;
+    color: white;
+}
+.view {
+    padding: 5%;
+}
+input, select {
+    margin: 5px 0 20px 0;
+}
+label, p {
+    display: block;
+    margin: 0 0 10px 0;
+}
