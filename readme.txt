@@ -14,6 +14,7 @@ Sessions are managed through the default php sessions, although JWT would be my 
 The Db class is used as the storage and processing portion of the build.
 It handles all the database calls initialization and processing.
 The css, templates and js folders hold the assets used by angular.
+Import is the file used to import the csv download into the database.
 
 From a broader perspective I used mysql and apache on docker.
 The mysql database is split into 8 tables.
@@ -28,7 +29,7 @@ This was essential for fast processing for step 3.
 Feel free to test everything out. 
 If I was alloted more time I would improve the project by adding status codes to the api calls.
 Currently the api passes a status variable in the json object back and forth on routes that can fail based on user input.
-I would also style the site more with more time.
+I would also style the site more with more time, and change the importer into an angular service.
 
 Feel free to contact me with any other questions.
 Best,
