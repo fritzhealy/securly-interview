@@ -7,6 +7,9 @@
 <input ng-model="kid.email" type="text"><br>
 <label>Input Club to find Kids and schools</label><br>
 <input ng-model="club.name" type="text"><br>
+<label>Input Kid one and two to find if connected</label><br>
+<input ng-model="kids.email1" type="text">
+<input ng-model="kids.email2" type="text"> Connected: {{kids.connected}}<br>
 <button ng-click="get()">Submit</button>
 <div class="results">
     <h2>Results</h2>

@@ -57,6 +57,10 @@ class Db {
             (name VARCHAR(50) NOT NULL , 
             value VARCHAR(100) NOT NULL,
             UNIQUE INDEX (name, value));");
+            $this->pdo->exec("CREATE TABLE IF NOT EXISTS connectedClubs
+            (lowerId VARCHAR(120) NOT NULL , 
+            upperId VARCHAR(120) NOT NULL,
+            UNIQUE INDEX (lowerId, upperId));");
         } catch (PDOException $e){
             //add error handling later
         }
@@ -110,6 +114,24 @@ class Db {
                     $club_kid_stmt->execute();
                     $school_club_stmt->execute();
                 }
+                //this section generates the connection data for the connected clubs
+                $kid_id = '';
+                $connected_clubs_stmt = $this->pdo->prepare("SELECT * FROM clubKidLink WHERE kidId=:id");
+                $connected_clubs_stmt->bindParam(':id',$kid_id,PDO::PARAM_STR);
+                $all_kid_stmt = $this->pdo->query("SELECT id from kid");
+                $rows = $all_kid_stmt->fetchAll(PDO::FETCH_ASSOC);
+                foreach($rows as $row){
+                    $kid_id = $row['id'];
+                    $connected_clubs_stmt->execute();
+                    $connected_rows = $connected_clubs_stmt->fetchALL(PDO::FETCH_ASSOC);
+                    $connected_ids = array();
+                    if($connected_clubs_stmt->rowCount()>1){
+                        foreach($connected_rows as $connected_row){
+                            $connected_ids[] = $connected_row['clubId'];
+                        }
+                        $this->recursive_insert_connections($connected_ids);
+                    }
+                }
             } catch(PDOException $e){
                 echo $e;
             }
@@ -118,7 +140,28 @@ class Db {
             return "Import failed, couldn't open file";
         }
     }
-
+    private function recursive_insert_connections($ids){
+        try {
+            $lower_id = '';
+            $upper_id = '';
+            sort($ids,SORT_NUMERIC);
+            $connected_clubs_insert_stmt = $this->pdo->prepare("INSERT INTO connectedClubs(lowerId, upperId)
+            VALUES(:lowerId, :upperId) ON DUPLICATE KEY UPDATE lowerId=:lowerId");
+            $connected_clubs_insert_stmt->bindParam(':lowerId',$lower_id,PDO::PARAM_STR);
+            $connected_clubs_insert_stmt->bindParam(':upperId',$upper_id,PDO::PARAM_STR);
+            if(count($ids)>1){
+                $lower_id = $ids[0];
+                for($i = 1; $i < count($ids); $i++){
+                    $upper_id = $ids[$i];
+                    $connected_clubs_insert_stmt->execute();
+                }
+                array_shift($ids);
+                $this->recursive_insert_connections($ids);
+            }
+        } catch(PDOException $e){
+            echo $e;
+        }
+    }
     public function get_kid($email){
         $return = array();
         try {
@@ -160,6 +203,56 @@ class Db {
         
         }
         return $return;
+    }
+    public function get_connected($email1, $email2){
+        try {
+            $email1_stmt = $this->pdo->prepare("SELECT ck.clubId FROM clubKidLink as ck
+            INNER JOIN kid as k on k.id = ck.kidId 
+            WHERE k.email=:email1
+            UNION
+            SELECT cc.upperId FROM clubKidLink as ck
+            INNER JOIN kid as k on k.id = ck.kidId 
+            INNER JOIN connectedClubs as cc on cc.lowerId = ck.clubId
+            WHERE k.email=:email1
+            UNION
+            SELECT cc.lowerId FROM clubKidLink as ck
+            INNER JOIN kid as k on k.id = ck.kidId 
+            INNER JOIN connectedClubs as cc on cc.upperId = ck.clubId
+            WHERE k.email=:email1");
+            $email1_stmt->execute(array(':email1'=>$email1));
+            $email1_rows = $email1_stmt->fetchALL(PDO::FETCH_NUM);
+            $email1_clubs = array();
+            foreach($email1_rows as $row){
+                $email1_clubs[]=$row[0];
+            }
+            $email2_stmt = $this->pdo->prepare("SELECT ck.clubId FROM clubKidLink as ck
+            INNER JOIN kid as k on k.id = ck.kidId 
+            WHERE k.email=:email2
+            UNION
+            SELECT cc.upperId FROM clubKidLink as ck
+            INNER JOIN kid as k on k.id = ck.kidId 
+            INNER JOIN connectedClubs as cc on cc.lowerId = ck.clubId
+            WHERE k.email=:email2
+            UNION
+            SELECT cc.lowerId FROM clubKidLink as ck
+            INNER JOIN kid as k on k.id = ck.kidId 
+            INNER JOIN connectedClubs as cc on cc.upperId = ck.clubId
+            WHERE k.email=:email2");
+            $email2_stmt->execute(array(':email2'=>$email2));
+            $email2_rows = $email2_stmt->fetchALL(PDO::FETCH_NUM);
+            $email2_clubs = array();
+            foreach($email2_rows as $row){
+                $email2_clubs[]=$row[0];
+            }
+            foreach($email1_clubs as $club){
+                if(in_array($club,$email2_clubs)){
+                    return array("status"=>true);
+                }
+            }
+        } catch(PDOException $e){
+
+        }
+        return array("status"=>false);
     }
     public function get_past_queries(){
         try {

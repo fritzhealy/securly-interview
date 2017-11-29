@@ -23,6 +23,8 @@ class Controller {
             Controller::save_query();
         } elseif(preg_match('/\/api\/queries*/',$_SERVER[REQUEST_URI])){
             Controller::get_past_queries();
+        } elseif(preg_match('/\/api\/connected*/',$_SERVER[REQUEST_URI])){
+            Controller::get_connected();
         } else {   
             Controller::default_route();
         }
@@ -61,6 +63,16 @@ class Controller {
         ob_start();
         if(isset($_GET['name'])){
             echo json_encode(self::$db->get_club($_GET['name']));
+        } else {
+            echo json_encode(array("status"=>false));
+        }
+        echo ob_get_clean();
+    }
+    private static function get_connected(){
+        header('Content-Type: application/json');
+        ob_start();
+        if(isset($_GET['email1'])&&isset($_GET['email2'])){
+            echo json_encode(self::$db->get_connected($_GET['email1'],$_GET['email2']));
         } else {
             echo json_encode(array("status"=>false));
         }

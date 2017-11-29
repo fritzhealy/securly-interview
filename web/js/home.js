@@ -101,6 +101,14 @@ function data($http){
                     method: "GET",
                 }
             );
+        },
+        getConnected: function(email1, email2){
+            return $http(
+                {
+                    url: '/api/connected?email1='+email1+"&email2="+email2,
+                    method: "GET",
+                }
+            )
         }
     };
 }
@@ -114,6 +122,7 @@ function controller($scope, data, $location, $route){
         }
     }
     $scope.kid = {};
+    $scope.kids = {};
     $scope.select = {};
     $scope.club = {};
     $scope.queries = {};
@@ -164,6 +173,8 @@ function controller($scope, data, $location, $route){
         if(value){
             $scope.club.name = "";
             $scope.kid.email = "";
+            $scope.kids.email1 = "";
+            $scope.kids.email2 = "";
             values = value.split("|");
             operation = values[0];
             value = values[1];
@@ -173,39 +184,62 @@ function controller($scope, data, $location, $route){
             if(operation=="getClub"){
                 $scope.club.name = value;
             }
+            if(operation=="getConnected"){
+                emails = value.split(":");
+                $scope.kids.email1 = emails[0];
+                $scope.kids.email2 = emails[1];
+            }
             $scope.get();
         }
     }
     $scope.get = function(){
-        data.getClub($scope.club.name)
-        .then(function(response){
-            $scope.club.schools = response.data.schools;
-            $scope.club.kids = response.data.kids; 
-            data.saveQuery("getClub",$scope.club.name)
-            .then(function(){
-                $scope.getPastQueries();
+        if($scope.club.name){
+            data.getClub($scope.club.name)
+            .then(function(response){
+                $scope.club.schools = response.data.schools;
+                $scope.club.kids = response.data.kids; 
+                data.saveQuery("getClub",$scope.club.name)
+                .then(function(){
+                    $scope.getPastQueries();
 
+                }).catch(function(){
+                    console.log("error");
+                });
+            })
+            .catch(function(){
+                console.log("error");
+            });
+        }
+        if($scope.kid.email){
+            data.getKid($scope.kid.email)
+            .then(function(response){
+                $scope.kid.clubs = response.data.clubs;
+                $scope.kid.schools = response.data.schools;
+                data.saveQuery("getKid",$scope.kid.email)
+                .then(function(){
+                    $scope.getPastQueries();
+
+                }).catch(function(){
+                    console.log("error");
+                });
+            })
+            .catch(function(error){
+                console.log("error");
+            });
+        }
+        if($scope.kids.email1&&$scope.kids.email2){
+            data.getConnected($scope.kids.email1,$scope.kids.email2)
+            .then(function(response){
+                $scope.kids.connected = response.data.status;
+                data.saveQuery("getConnected",$scope.kids.email1+":"+$scope.kids.email2)
+                .then(function(){
+                    $scope.getPastQueries();
+                }).catch(function(){
+                    console.log("error");
+                });
             }).catch(function(){
                 console.log("error");
             });
-        })
-        .catch(function(){
-            console.log("error");
-        });
-        data.getKid($scope.kid.email)
-        .then(function(response){
-            $scope.kid.clubs = response.data.clubs;
-            $scope.kid.schools = response.data.schools;
-            data.saveQuery("getKid",$scope.kid.email)
-            .then(function(){
-                $scope.getPastQueries();
-
-            }).catch(function(){
-                console.log("error");
-            });
-        })
-        .catch(function(error){
-            console.log("error");
-        });
+        }
     }
 }
