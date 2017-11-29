@@ -121,6 +121,7 @@ function controller($scope, data, $location, $route){
             }
         }
     }
+    $scope.banner = "";
     $scope.kid = {};
     $scope.kids = {};
     $scope.select = {};
@@ -141,6 +142,8 @@ function controller($scope, data, $location, $route){
         .then(function(response){
             if(response.data.status===true){
                 $location.path('/dashboard');
+            } else {            
+                $scope.banner = "Access denied, please try again.";
             }
         })
         .catch(function(){

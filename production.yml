@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+   db:
+     image: mysql:5.7
+     volumes:
+       - db_data:/var/lib/mysql
+     restart: always
+     ports: 
+       - "3306:3306"
+     environment:
+       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       MYSQL_DATABASE: securly
+   app:
+     depends_on: 
+       - db
+    
+     build: 
+       context: ./
+       dockerfile: production
+     image: securly
+     ports:
+       - "80:80"
+     restart: always
+volumes:
+  db_data:

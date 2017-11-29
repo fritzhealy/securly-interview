@@ -23,9 +23,9 @@ if(isset($_FILES['file'])){
     <body>
         <h1>Importer</h1>
         <h2><?php if($message) echo $message;?></h2>
-        <form method="POST" action="" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <input type="submit" value="submit">
+        <form method="POST" action="/import" enctype="multipart/form-data">
+            <input type="file" name="file">
+            <input type="submit" value="submit">
         </form>
     </body>
 </html>
