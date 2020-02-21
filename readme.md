@@ -1,3 +1,7 @@
+# Securly Interview Project
+This is my submission to securly during the interview process for a micro site that sorts and processes various datapoints.
+
+## Introduction / Letter to The Reviewer
 Hello, and thank you for the opportunity to reach thus far in the interview process. 
 
 I'll just jump right in.
@@ -34,3 +38,17 @@ I would also style the site more with more time, and change the importer into an
 Feel free to contact me with any other questions.
 Best,
 Frederick (Fritz) Healy
+
+## INSTALLATION
+Locally please run:  
+``
+$ git clone https://github.com/fritzhealy/securly-interview.git
+$ docker-compose up -d
+``
+
+For production please run:  
+``
+$ docker-compose -f production.yml up -d
+``
+
+Docker commands are available thereafter for administration
